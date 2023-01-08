@@ -10,3 +10,4 @@ topic.
 | Course                     | Progress |
 |----------------------------|----------|
 | Data Visualization with D3 | 100%     |
+| JSON APIs and AJAX         | 40%      |
