@@ -190,28 +190,105 @@ const dataset = [
                 ];
 
 
-    const w = 500;
-    const h = 500;
+const w = 500;
+const h = 500;
 
-    const svg = d3.select("body")
-                  .append("svg")
-                  .attr("width", w)
-                  .attr("height", h);
+const svg = d3.select("body")
+              .append("svg")
+              .attr("width", w)
+              .attr("height", h);
 
-    svg.selectAll("circle")
-       .data(dataset)
-       .enter()
-       .append("circle")
-        // cx, cy are the coordinates of the center of the circle, r the radius
-       .attr("cx", (d, i) => d[0])
-       .attr("cy", (d, i) => h - d[1])
-       .attr("r", 5);
+svg.selectAll("circle")
+   .data(dataset)
+   .enter()
+   .append("circle")
+    // cx, cy are the coordinates of the center of the circle, r the radius
+   .attr("cx", (d, i) => d[0])
+   .attr("cy", (d, i) => h - d[1])
+   .attr("r", 5);
 
-    svg.selectAll("text")
-       .data(dataset)
-       .enter()
-       .append("text")
-       .text((d) => d[0] + ', ' + d[1])
-       .attr("x", (d, i) => d[0] + 5)
-       .attr("y", (d, i) => h - d[1])
+svg.selectAll("text")
+   .data(dataset)
+   .enter()
+   .append("text")
+   .text((d) => d[0] + ', ' + d[1])
+   .attr("x", (d, i) => d[0] + 5)
+   .attr("y", (d, i) => h - d[1])
+```
+
+### Using a linear scale
+
+```javascript
+const scale = d3.scaleLinear();
+scale.domain([50, 480]); // the range of the input data
+scale.range([10, 500]); // the range of the output (svg size)
+scale(50) // 10
+scale(480) // 500
+scale(325) // 323.37
+scale(750) // 807.67
+d3.scaleLinear()
+```
+
+### Using and showing dynamic scales
+
+```javascript
+const dataset = [
+              [ 34,    78 ],
+              [ 109,   280 ],
+              [ 310,   120 ],
+              [ 79,    411 ],
+              [ 420,   220 ],
+              [ 233,   145 ],
+              [ 333,   96 ],
+              [ 222,   333 ],
+              [ 78,    320 ],
+              [ 21,    123 ]
+            ];
+
+const w = 500;
+const h = 500;
+
+// Padding between the SVG canvas boundary and the plot
+const padding = 30;
+
+// Create an x and y scale
+const xScale = d3.scaleLinear()
+                .domain([0, d3.max(dataset, (d) => d[0])])
+                .range([padding, w - padding]);
+
+const yScale = d3.scaleLinear()
+                .domain([0, d3.max(dataset, (d) => d[1])])
+                .range([h - padding, padding]); // interval flipped because of y-drawing coords growing downwards
+
+const output = yScale(411); // Returns 30
+
+// displaying data by positions elements using scaled data
+svg.selectAll("circle")
+    .data(dataset)
+    .enter()
+    .append("circle")
+    .attr('cx', (d) => xScale(d[0]))
+    .attr('cy', (d) => yScale(d[1]))
+    .attr('r', 5)
+
+svg.selectAll("text")
+    .data(dataset)
+    .enter()
+    .append("text")
+    .text((d) =>  (d[0] + ", " + d[1]))
+    .attr('x', (d) => xScale(d[0] + 10))
+    .attr('y', (d) => yScale(d[1]))
+
+// draw axes
+const xAxis = d3.axisBottom(xScale); // create axis generator function
+const yAxis = d3.axisLeft(yScale);
+
+
+svg.append("g") // add new graphics to svg
+    .attr("transform", "translate(0," + (h - padding) + ")") // move graphics to be in view and in the right place
+    .call(xAxis); // call axis generator with current selection
+
+svg.append("g")
+    .attr("transform", "translate(" + padding + ", 0)")
+    .call(yAxis)
 ```
